@@ -1,6 +1,6 @@
 import numpy as np
+import pandas as pd
 from gymnasium import Env
-from gymnasium.core import ActType
 from gymnasium.spaces import Box
 from numpy._core.numerictypes import float32
 from pandas import DataFrame
@@ -29,17 +29,20 @@ class MicroGrdEnv(Env):
 
         return self.current_soc, {}
 
-    def energia_solicitada(self, a, t):
+    def energy_required(self, a, t):
         return a * self.max_pwer_kw * t
 
     def charge_energy(self, action):
         return self.current_soc + (
-            (self.energia_solicitada(action, 1.0) * self.efficiency)
+            (self.energy_required(action, 1.0) * self.efficiency)
             / self.baterry_capacity
         )
 
     def discharge_energy(self, action):
         return self.current_soc + (
-            self.energia_solicitada(action, 1.0)
+            self.energy_required(action, 1.0)
             / (self.baterry_capacity * self.efficiency)
         )
+
+    # metodo que permite retorna la observación del agente
+    def _get_obs(self):
