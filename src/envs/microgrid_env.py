@@ -19,15 +19,25 @@ class MicroGrdEnv(Env):
         self.position = 0
 
     def step(self, action):
+
+        # demanda actual
+
         if action[0] > 0:
             self.current_soc = self.charge_energy(action[0])
         elif action[0] < 0:
             self.current_soc = self.discharge_energy(action[0])
 
+        energy_demand = self.dataset.iloc[self.position]
+        energy_red = energy_demand + self.energy_required(action[0], 1.0)
+        reward = self._calculate_reward(energy_demand, action[0])
+
         self.current_soc = np.clip(self.current_soc, 0.0, 1.0)
         self.position += 1
 
-        return self.current_soc, {}
+        # verificamos que siga en el rango del dataset
+        terminated = self.position >= len(self.dataset) - 1
+
+        return self._get_obs, reward, terminated, False, {}
 
     def energy_required(self, a, t):
         return a * self.max_pwer_kw * t
@@ -44,14 +54,24 @@ class MicroGrdEnv(Env):
             / (self.baterry_capacity * self.efficiency)
         )
 
-    # metodo que permite retorna la observación del agente
     def _get_obs(self) -> np.float32:
+        """
+        metodo que permite retorna la observación del agente
+        con el SoC, energia demandada y hora.
+        """
         energy_demand = self.dataset.iloc[self.position]["Global_active_power"]
         hour = self.dataset.iloc[self.position]["Hour"]
         return np.array([self.current_soc, energy_demand, hour], dtype=np.float32)
 
     def reset(self, seed):
+        """
+        permite reiniciar el entorno volviendo a la posición 0
+        y el estado de la bateria en 50%
+        """
         self.position = 0
         self.current_soc = 0.50
 
         return self._get_obs(), {}
+
+    def _calculate_reward(self, demanda, action):
+        pass
