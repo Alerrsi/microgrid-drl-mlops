@@ -45,4 +45,13 @@ class MicroGrdEnv(Env):
         )
 
     # metodo que permite retorna la observación del agente
-    def _get_obs(self):
+    def _get_obs(self) -> np.float32:
+        energy_demand = self.dataset.iloc[self.position]["Global_active_power"]
+        hour = self.dataset.iloc[self.position]["Hour"]
+        return np.array([self.current_soc, energy_demand, hour], dtype=np.float32)
+
+    def reset(self, seed):
+        self.position = 0
+        self.current_soc = 0.50
+
+        return self._get_obs(), {}
