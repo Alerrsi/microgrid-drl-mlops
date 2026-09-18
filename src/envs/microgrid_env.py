@@ -27,9 +27,11 @@ class MicroGrdEnv(Env):
         elif action[0] < 0:
             self.current_soc = self.discharge_energy(action[0])
 
-        energy_demand = self.dataset.iloc[self.position]
-        energy_red = energy_demand + self.energy_required(action[0], 1.0)
-        reward = self._calculate_reward(energy_demand, action[0])
+        energy_demand = self.dataset.iloc[self.position]["Global_active_power"]
+        energy_red = self._calculate_energy_red(
+            energy_demand, self.energy_required(action[0], 1.0)
+        )
+        reward = self._calculate_reward(energy_red)
 
         self.current_soc = np.clip(self.current_soc, 0.0, 1.0)
         self.position += 1
@@ -37,7 +39,7 @@ class MicroGrdEnv(Env):
         # verificamos que siga en el rango del dataset
         terminated = self.position >= len(self.dataset) - 1
 
-        return self._get_obs, reward, terminated, False, {}
+        return self._get_obs(), reward, terminated, False, {}
 
     def energy_required(self, a, t):
         return a * self.max_pwer_kw * t
@@ -73,5 +75,8 @@ class MicroGrdEnv(Env):
 
         return self._get_obs(), {}
 
-    def _calculate_reward(self, demanda, action):
-        pass
+    def _calculate_energy_red(self, demand: float, required: float) -> float:
+        return demand + required
+
+    def _calculate_reward(self, energy_red: float) -> float:
+        return -max(0.0, energy_red)
