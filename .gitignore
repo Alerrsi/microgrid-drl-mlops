@@ -4,4 +4,4 @@ data/
 raw/
 processed/
 notebooks/
-
+.env
