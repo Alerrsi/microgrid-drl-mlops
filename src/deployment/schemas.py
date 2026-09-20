@@ -1,6 +1,9 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+import numpy as np
+from pydantic import BaseModel, ConfigDict, computed_field
+
+from src.deployment.ppo import model
 
 
 # clase que dictamina que información debe recibir el endpoint al modelo mediante POST
@@ -19,4 +22,14 @@ class BatteryResponse(BaseModel):
     SoC: float
     time: datetime
     demand: float
-    prediction: float
+
+    @computed_field
+    @property
+    def prediction(self) -> dict:
+        data = np.array([self.SoC, self.demand, self.time.hour], dtype=np.float32)
+
+        predict, _ = model.predict(data, deterministic=True)
+
+        action = "Using Battery" if predict < 0 else "Charging battery"
+
+        return {"Action": action, "Prediction": float(predict[0])}
