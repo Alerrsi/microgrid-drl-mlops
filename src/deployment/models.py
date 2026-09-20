@@ -13,3 +13,4 @@ class Battery(Base):
     name: Mapped[str] = mapped_column(String(100))
     SoC: Mapped[float] = mapped_column(Float())
     time: Mapped[datetime] = mapped_column(DateTime)
+    demand: Mapped[float] = mapped_column(Float)

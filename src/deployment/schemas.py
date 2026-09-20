@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from pandas._libs.tslibs.offsets import Hour
 from pydantic import BaseModel, ConfigDict
 
 
@@ -9,6 +8,7 @@ class BatteryCreate(BaseModel):
     name: str
     SoC: float
     time: datetime
+    demand: float
 
 
 # clase que determina la respuesta
@@ -18,3 +18,5 @@ class BatteryResponse(BaseModel):
     name: str
     SoC: float
     time: datetime
+    demand: float
+    prediction: float
