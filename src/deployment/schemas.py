@@ -33,3 +33,7 @@ class BatteryResponse(BaseModel):
         action = "Using Battery" if predict < 0 else "Charging battery"
 
         return {"Action": action, "Prediction": float(predict[0])}
+
+
+class BaterryPrediction(Basemodel):
+    pass

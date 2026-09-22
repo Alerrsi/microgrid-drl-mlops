@@ -40,9 +40,9 @@ class MicroGrdEnv(Env):
         energy_red = self._calculate_energy_red(
             energy_demand, self.energy_required(action[0], 1.0)
         )
+        self.current_soc = np.clip(self.current_soc, 0.0, 1.0)
         reward = self._calculate_reward(energy_red)
 
-        self.current_soc = np.clip(self.current_soc, 0.0, 1.0)
         self.position += 1
         self.current_step_in_episode += 1
 
@@ -95,3 +95,6 @@ class MicroGrdEnv(Env):
 
     def _calculate_reward(self, energy_red: float) -> float:
         return -max(0.0, energy_red)
+
+    def _price(self):
+        pass
